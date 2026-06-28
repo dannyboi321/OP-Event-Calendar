@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OP Tournament Chart</title>
+<style>
+  :root {
+    --ink: #1a2332;
+    --ink-soft: #2a3548;
+    --parchment: #e8dcc4;
+    --parchment-light: #f3ead6;
+    --rust: #c1502e;
+    --rust-dark: #9c3d22;
+    --gold: #b8923a;
+    --text: #2a2420;
+    --text-soft: #5c5347;
+    --line: rgba(26, 35, 50, 0.14);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ink);
+    background-image:
+      radial-gradient(circle at 20% 15%, rgba(184, 146, 58, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(193, 80, 46, 0.06), transparent 45%);
+    color: var(--parchment);
+    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  header.masthead {
+    text-align: center;
+    padding: 12px 0 28px;
+    border-bottom: 1px solid rgba(232, 220, 196, 0.18);
+    margin-bottom: 28px;
+  }
+
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 10px;
+  }
+
+  h1.title {
+    font-size: clamp(28px, 5vw, 44px);
+    margin: 0;
+    letter-spacing: 0.01em;
+    font-weight: 600;
+  }
+
+  .subtitle {
+    color: rgba(232, 220, 196, 0.6);
+    font-size: 14px;
+    margin-top: 8px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    letter-spacing: 0.02em;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .month-nav button {
+    background: transparent;
+    border: 1px solid rgba(232, 220, 196, 0.35);
+    color: var(--parchment);
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .month-nav button:hover { background: rgba(232, 220, 196, 0.1); border-color: var(--gold); }
+  .month-nav button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .month-label {
+    font-size: 20px;
+    min-width: 200px;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+
+  .view-toggle {
+    display: flex;
+    gap: 6px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+  }
+  .view-toggle button {
+    background: transparent;
+    border: 1px solid rgba(232, 220, 196, 0.35);
+    color: rgba(232, 220, 196, 0.7);
+    padding: 7px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .view-toggle button.active {
+    background: var(--gold);
+    color: var(--ink);
+    border-color: var(--gold);
+    font-weight: 600;
+  }
+  .view-toggle button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: rgba(232, 220, 196, 0.65);
+    margin-bottom: 22px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Calendar grid */
+  .calendar-card {
+    background: var(--parchment-light);
+    border-radius: 6px;
+    padding: 20px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+  }
+
+  .weekday-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 4px;
+  }
+  .weekday-row div {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    padding: 6px 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .day-cell {
+    background: rgba(255,255,255,0.4);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    min-height: 92px;
+    padding: 6px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .day-cell.outside { background: transparent; border-color: transparent; }
+  .day-cell.today { border-color: var(--rust); border-width: 1.5px; }
+
+  .day-num {
+    font-size: 12px;
+    color: var(--text-soft);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    align-self: flex-end;
+  }
+  .day-cell.today .day-num { color: var(--rust-dark); font-weight: 700; }
+
+  .chip {
+    display: block;
+    font-size: 10.5px;
+    line-height: 1.25;
+    padding: 2px 5px;
+    border-radius: 3px;
+    color: var(--parchment-light);
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    cursor: pointer;
+  }
+  .chip:hover { filter: brightness(1.15); }
+  .chip.sec-championship { background: var(--rust-dark); }
+  .chip.sec-official { background: #5a6b8c; }
+  .chip.sec-shop { background: #6f7d4f; }
+  .chip.sec-convention { background: var(--gold); color: var(--ink); }
+
+  .chip.continuation { opacity: 0.55; }
+
+  /* List view */
+  .list-view { display: none; }
+  .list-view.active { display: block; }
+  .calendar-view.hidden { display: none; }
+
+  .month-group { margin-bottom: 28px; }
+  .month-group h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-soft);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  .list-item {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    color: var(--text);
+  }
+  .list-item:hover .list-title { color: var(--rust-dark); }
+  .list-date {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    color: var(--text-soft);
+    min-width: 92px;
+    flex-shrink: 0;
+  }
+  .list-title { font-size: 15px; font-weight: 600; transition: color 0.15s; }
+  .list-meta { font-size: 12px; color: var(--text-soft); margin-top: 2px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+  .empty-note {
+    text-align: center;
+    color: var(--text-soft);
+    padding: 40px 20px;
+    font-size: 14px;
+  }
+
+  footer.meta {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 11px;
+    color: rgba(232, 220, 196, 0.4);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    letter-spacing: 0.04em;
+  }
+  footer.meta a { color: rgba(232, 220, 196, 0.6); }
+
+  @media (max-width: 640px) {
+    .day-cell { min-height: 64px; }
+    .chip { font-size: 9px; }
+    .month-label { font-size: 16px; min-width: 140px; }
+    .controls { justify-content: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Bandai · One Piece Card Game</p>
+    <h1 class="title">Tournament Chart</h1>
+    <p class="subtitle" id="generated-note">Loading chart data…</p>
+  </header>
+
+  <div class="controls">
+    <div class="month-nav">
+      <button id="prev-month" aria-label="Previous month">‹</button>
+      <div class="month-label" id="month-label">—</div>
+      <button id="next-month" aria-label="Next month">›</button>
+    </div>
+    <div class="view-toggle">
+      <button id="btn-calendar" class="active">Calendar</button>
+      <button id="btn-list">List</button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:var(--rust-dark)"></span> Championship</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#5a6b8c"></span> Official Events</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#6f7d4f"></span> Shop Events</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--gold)"></span> Convention Events</div>
+  </div>
+
+  <div class="calendar-card">
+    <div class="calendar-view" id="calendar-view">
+      <div class="weekday-row">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+    <div class="list-view" id="list-view"></div>
+  </div>
+
+  <footer class="meta">
+    Auto-updated from <a href="https://en.onepiece-cardgame.com/events/" target="_blank" rel="noopener">en.onepiece-cardgame.com/events</a> every 30 minutes · <span id="footer-generated"></span>
+  </footer>
+
+</div>
+
+<script>
+const SECTION_CLASS = {
+  "Championship": "sec-championship",
+  "Official Events": "sec-official",
+  "Shop Events": "sec-shop",
+  "Convention Events": "sec-convention",
+};
+
+let allEvents = [];
+let viewDate = new Date();
+viewDate.setDate(1);
+
+function pad(n) { return String(n).padStart(2, "0"); }
+function isoDate(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+
+function expandEventDays(ev) {
+  // Returns list of {date: 'YYYY-MM-DD', isStart: bool} this event occupies.
+  // Open-ended events ("X onwards") just mark the single start day.
+  // Ranged events mark every day in range, capped to avoid pathological huge ranges.
+  if (!ev.start_date) return [];
+  const days = [];
+  const start = new Date(ev.start_date + "T00:00:00");
+  const end = ev.end_date ? new Date(ev.end_date + "T00:00:00") : start;
+  let cursor = new Date(start);
+  let count = 0;
+  while (cursor <= end && count < 200) {
+    days.push({ date: isoDate(cursor), isStart: count === 0 });
+    cursor.setDate(cursor.getDate() + 1);
+    count++;
+  }
+  return days;
+}
+
+function buildDayMap(events) {
+  const map = {};
+  for (const ev of events) {
+    for (const d of expandEventDays(ev)) {
+      if (!map[d.date]) map[d.date] = [];
+      map[d.date].push({ ev, isStart: d.isStart });
+    }
+  }
+  return map;
+}
+
+function sectionClass(section) {
+  return SECTION_CLASS[section] || "sec-official";
+}
+
+function renderCalendar() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  document.getElementById("month-label").textContent =
+    viewDate.toLocaleString("default", { month: "long", year: "numeric" });
+
+  const firstOfMonth = new Date(year, month, 1);
+  const startWeekday = firstOfMonth.getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const dayMap = buildDayMap(allEvents);
+  const todayIso = isoDate(new Date());
+
+  const totalCells = Math.ceil((startWeekday + daysInMonth) / 7) * 7;
+  for (let i = 0; i < totalCells; i++) {
+    const dayNum = i - startWeekday + 1;
+    const cell = document.createElement("div");
+    cell.className = "day-cell";
+
+    if (dayNum < 1 || dayNum > daysInMonth) {
+      cell.classList.add("outside");
+      grid.appendChild(cell);
+      continue;
+    }
+
+    const cellDate = new Date(year, month, dayNum);
+    const cellIso = isoDate(cellDate);
+    if (cellIso === todayIso) cell.classList.add("today");
+
+    const numEl = document.createElement("div");
+    numEl.className = "day-num";
+    numEl.textContent = dayNum;
+    cell.appendChild(numEl);
+
+    const entries = dayMap[cellIso] || [];
+    for (const entry of entries.slice(0, 4)) {
+      const chip = document.createElement("a");
+      chip.className = `chip ${sectionClass(entry.ev.section)}` + (entry.isStart ? "" : " continuation");
+      chip.href = entry.ev.url;
+      chip.target = "_blank";
+      chip.rel = "noopener";
+      chip.title = `${entry.ev.title} — ${entry.ev.period_text}`;
+      chip.textContent = entry.ev.title;
+      cell.appendChild(chip);
+    }
+    if (entries.length > 4) {
+      const more = document.createElement("div");
+      more.className = "chip";
+      more.style.background = "transparent";
+      more.style.color = "var(--text-soft)";
+      more.textContent = `+${entries.length - 4} more`;
+      cell.appendChild(more);
+    }
+
+    grid.appendChild(cell);
+  }
+}
+
+function renderList() {
+  const listEl = document.getElementById("list-view");
+  listEl.innerHTML = "";
+
+  const sorted = [...allEvents]
+    .filter(e => e.start_date)
+    .sort((a, b) => a.start_date.localeCompare(b.start_date));
+  const undated = allEvents.filter(e => !e.start_date);
+
+  const groups = {};
+  for (const ev of sorted) {
+    const d = new Date(ev.start_date + "T00:00:00");
+    const key = d.toLocaleString("default", { month: "long", year: "numeric" });
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(ev);
+  }
+
+  if (sorted.length === 0 && undated.length === 0) {
+    listEl.innerHTML = '<div class="empty-note">No tournaments found yet. Check back after the next sync.</div>';
+    return;
+  }
+
+  for (const [monthLabel, events] of Object.entries(groups)) {
+    const group = document.createElement("div");
+    group.className = "month-group";
+    const h3 = document.createElement("h3");
+    h3.textContent = monthLabel;
+    group.appendChild(h3);
+
+    for (const ev of events) {
+      const item = document.createElement("a");
+      item.className = "list-item";
+      item.href = ev.url;
+      item.target = "_blank";
+      item.rel = "noopener";
+
+      const dateEl = document.createElement("div");
+      dateEl.className = "list-date";
+      const d = new Date(ev.start_date + "T00:00:00");
+      dateEl.textContent = d.toLocaleString("default", { month: "short", day: "numeric" });
+      item.appendChild(dateEl);
+
+      const textWrap = document.createElement("div");
+      const titleEl = document.createElement("div");
+      titleEl.className = "list-title";
+      titleEl.textContent = ev.title;
+      const metaEl = document.createElement("div");
+      metaEl.className = "list-meta";
+      metaEl.textContent = `${ev.section} · ${ev.period_text}`;
+      textWrap.appendChild(titleEl);
+      textWrap.appendChild(metaEl);
+      item.appendChild(textWrap);
+
+      group.appendChild(item);
+    }
+    listEl.appendChild(group);
+  }
+
+  if (undated.length) {
+    const group = document.createElement("div");
+    group.className = "month-group";
+    const h3 = document.createElement("h3");
+    h3.textContent = "Date unclear";
+    group.appendChild(h3);
+    for (const ev of undated) {
+      const item = document.createElement("a");
+      item.className = "list-item";
+      item.href = ev.url;
+      item.target = "_blank";
+      item.rel = "noopener";
+      const dateEl = document.createElement("div");
+      dateEl.className = "list-date";
+      dateEl.textContent = "—";
+      item.appendChild(dateEl);
+      const textWrap = document.createElement("div");
+      const titleEl = document.createElement("div");
+      titleEl.className = "list-title";
+      titleEl.textContent = ev.title;
+      const metaEl = document.createElement("div");
+      metaEl.className = "list-meta";
+      metaEl.textContent = `${ev.section} · ${ev.period_text}`;
+      textWrap.appendChild(titleEl);
+      textWrap.appendChild(metaEl);
+      item.appendChild(textWrap);
+      group.appendChild(item);
+    }
+    listEl.appendChild(group);
+  }
+}
+
+function setView(view) {
+  const calBtn = document.getElementById("btn-calendar");
+  const listBtn = document.getElementById("btn-list");
+  const calView = document.getElementById("calendar-view");
+  const listView = document.getElementById("list-view");
+  const nav = document.querySelector(".month-nav");
+
+  if (view === "calendar") {
+    calBtn.classList.add("active"); listBtn.classList.remove("active");
+    calView.classList.remove("hidden");
+    listView.classList.remove("active");
+    nav.style.visibility = "visible";
+  } else {
+    listBtn.classList.add("active"); calBtn.classList.remove("active");
+    calView.classList.add("hidden");
+    listView.classList.add("active");
+    nav.style.visibility = "hidden";
+  }
+}
+
+document.getElementById("prev-month").addEventListener("click", () => {
+  viewDate.setMonth(viewDate.getMonth() - 1);
+  renderCalendar();
+});
+document.getElementById("next-month").addEventListener("click", () => {
+  viewDate.setMonth(viewDate.getMonth() + 1);
+  renderCalendar();
+});
+document.getElementById("btn-calendar").addEventListener("click", () => setView("calendar"));
+document.getElementById("btn-list").addEventListener("click", () => setView("list"));
+
+fetch("events.json?_=" + Date.now())
+  .then(r => r.json())
+  .then(data => {
+    allEvents = data.events || [];
+    const gen = new Date(data.generated_at);
+    document.getElementById("generated-note").textContent =
+      `${allEvents.length} tournament${allEvents.length === 1 ? "" : "s"} charted`;
+    document.getElementById("footer-generated").textContent =
+      `last synced ${gen.toLocaleString()}`;
+    renderCalendar();
+    renderList();
+  })
+  .catch(err => {
+    document.getElementById("generated-note").textContent = "Couldn't load chart data.";
+    console.error(err);
+  });
+</script>
+</body>
+</html>
