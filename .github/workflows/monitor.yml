@@ -1,0 +1,41 @@
+name: One Piece Tournament Monitor
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+env:
+  INCLUDED_SECTIONS: "Championship,Official Events,Shop Events"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run monitor
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          INCLUDED_SECTIONS: ${{ env.INCLUDED_SECTIONS }}
+        run: python monitor.py
+
+      - name: Commit updated state file
+        run: |
+          git config user.name "op-tournament-monitor-bot"
+          git config user.email "actions@github.com"
+          git add seen.json
+          git diff --quiet --cached || git commit -m "Update seen events [skip ci]"
+          git pushD
