@@ -1,34 +1,37 @@
 #!/usr/bin/env python3
 """
-One Piece Card Game - Tournament Event Monitor
-Watches https://en.onepiece-cardgame.com/events/ for new posts labeled
-"Tournament" (anywhere in their category label, e.g. "Tournament",
-"Side Event Tournament", "Official Shop Only Regularly Held Tournament")
-across all four sections (Championship, Official Events, Shop Events,
-Convention Events), and posts new ones to a Discord webhook.
+One Piece Card Game - Tournament Monitor + Calendar Data Generator
 
-State (which event URLs have already been seen) is stored in seen.json.
-On GitHub Actions, this file is committed back to the repo after each run
-so the monitor remembers what it already alerted on.
+1. Fetches https://en.onepiece-cardgame.com/events/
+2. Parses every event card across all four sections
+3. Filters to ones tagged "Tournament" within the included sections
+4. Diffs against seen.json -- sends a Discord webhook for anything new,
+   with the link and full event info
+5. Writes docs/events.json -- a flat list of ALL known tournaments (with
+   best-effort parsed start/end dates) for the calendar webpage to render
+
+docs/events.json is committed back to the repo, and docs/index.html (a
+static calendar page, see calendar.html) reads it client-side. GitHub Pages
+serves the docs/ folder for free.
 """
 
 import json
 import os
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
 
 EVENTS_URL = "https://en.onepiece-cardgame.com/events/"
-STATE_FILE = Path(__file__).parent / "seen.json"
+ROOT = Path(__file__).parent
+STATE_FILE = ROOT / "seen.json"
+DOCS_DIR = ROOT / "docs"
+EVENTS_JSON_FILE = DOCS_DIR / "events.json"
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
 
-# Which sections to monitor. Comma-separated, case-insensitive. Defaults to
-# all four. Set the INCLUDED_SECTIONS env var (e.g. in the GitHub Actions
-# workflow file) to restrict this -- e.g. "Championship,Official Events,Shop Events"
-# to exclude Convention Events, or back to the full list to re-include them.
 ALL_SECTIONS = ["Championship", "Official Events", "Shop Events", "Convention Events"]
 _included_raw = os.environ.get("INCLUDED_SECTIONS", "").strip()
 if _included_raw:
@@ -43,8 +46,10 @@ HEADERS = {
     )
 }
 
-# The four section anchors on the page, used only for nicer Discord labeling.
-SECTION_ANCHORS = ["CHAMPIONSHIP", "OFFICIALEVENTS", "SHOPEVENTS", "CONVENTIONEVENTS"]
+MONTHS = {
+    "january": 1, "february": 2, "march": 3, "april": 4, "may": 5, "june": 6,
+    "july": 7, "august": 8, "september": 9, "october": 10, "november": 11, "december": 12,
+}
 
 
 def fetch_page(url: str) -> str:
@@ -71,32 +76,10 @@ def clean_text(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
-def find_section_title(anchor_id: str | None) -> str:
-    mapping = {
-        "CHAMPIONSHIP": "Championship",
-        "OFFICIALEVENTS": "Official Events",
-        "SHOPEVENTS": "Shop Events",
-        "CONVENTIONEVENTS": "Convention Events",
-    }
-    return mapping.get(anchor_id, "Events")
-
-
 def parse_events(html: str):
-    """
-    Parse every event card/link on the events page.
-    Each event link's visible text follows the pattern:
-        <Label(s)> <Title> Event Period: <period> Regulation: <reg> <description...>
-    e.g. "Tournament Treasure Cup August 2026 Event Period: August 2026 onwards
-          Regulation: Standard The ONE PIECE CARD GAME Treasure Cup is a year-round..."
-    We split out the label (everything before the title) using known label keywords,
-    and flag it as a tournament if "Tournament" appears in that label segment.
-    """
     soup = BeautifulSoup(html, "html.parser")
     events = []
     seen_hrefs_this_parse = set()
-
-    # Determine current section by walking the DOM in order and tracking
-    # the nearest preceding heading/anchor.
     current_section = "Events"
 
     for el in soup.find_all(["h2", "h3", "a"]):
@@ -117,7 +100,6 @@ def parse_events(html: str):
             href = el.get("href", "")
             if not href or href.startswith("#"):
                 continue
-            # Only interested in actual event detail pages under /events/
             if "/events/" not in href:
                 continue
             full_url = href if href.startswith("http") else f"https://en.onepiece-cardgame.com{href}"
@@ -126,22 +108,16 @@ def parse_events(html: str):
             text = clean_text(el.get_text())
             if not text or len(text) < 5:
                 continue
-            # Skip nav links like "FIND AN EVENT", "LEARN MORE", "VIEW ALL EVENTS"
             if full_url.rstrip("/").endswith("/events"):
                 continue
             if text.upper() in {"LEARN MORE", "FIND AN EVENT", "FIND RELATED EVENTS", "VIEW ALL EVENTS", "PAST EVENTS"}:
                 continue
-            # Must contain "Event Period:" to be a real event card
             if "Event Period:" not in text:
                 continue
             if full_url in seen_hrefs_this_parse:
                 continue
             seen_hrefs_this_parse.add(full_url)
 
-            # Split off the label (text before the title) -- label ends right
-            # before "Event Period:" only tells us where the period starts,
-            # but the title itself sits between the label and "Event Period:".
-            # Known label keywords used on this site:
             label_keywords = [
                 "Side Event Tournament",
                 "Official Shop Only Regularly Held Tournament",
@@ -161,11 +137,9 @@ def parse_events(html: str):
                     rest = text[len(kw):].strip()
                     break
 
-            # Title is everything up to "Event Period:"
             period_idx = rest.find("Event Period:")
             title = rest[:period_idx].strip() if period_idx != -1 else rest.strip()
 
-            # Extract period string
             period = ""
             m = re.search(r"Event Period:\s*(.*?)(?:\s*Regulation:|\s+[A-Z][a-z]+ (?:the|us|your|for|is|are|will))", text)
             if not m:
@@ -187,10 +161,113 @@ def parse_events(html: str):
     return events
 
 
+def parse_period_to_dates(period: str):
+    """
+    Best-effort parse of the free-text "Event Period" string into
+    (start_date, end_date) ISO strings (end_date may be None for open-ended
+    or single-day-style periods). Handles patterns seen on the site:
+      "August 2026 onwards"            -> start=2026-08-01, end=None
+      "2026 onwards"                   -> start=2026-01-01, end=None
+      "July 1 - September 30, 2026"    -> start=2026-07-01, end=2026-09-30
+      "April 1 - June 30, 2026"        -> start=2026-04-01, end=2026-06-30
+      "July 30 - August 2, 2026"       -> start=2026-07-30, end=2026-08-02
+      "March 2026 onwards"             -> start=2026-03-01, end=None
+    Returns (None, None) if nothing recognizable is found.
+    """
+    p = period.strip()
+
+    # Pattern: single date "<Month> <Day>, <Year>" with NO range dash
+    # (must check this before the range pattern below doesn't accidentally
+    # match it; checking single-date first and requiring no dash is safest)
+    if "-" not in p:
+        m = re.match(r"^([A-Za-z]+)\s+(\d{1,2}),?\s*(\d{4})$", p)
+        if m:
+            mon, day, year = m.groups()
+            mon_num = MONTHS.get(mon.lower())
+            if mon_num:
+                try:
+                    d = datetime(int(year), mon_num, int(day)).date().isoformat()
+                    return d, d
+                except ValueError:
+                    pass
+
+    # Pattern: "<Month> <Day> - <Month> <Day>, <Year>" or same-month "<Month> <Day> - <Day>, <Year>"
+    m = re.match(
+        r"([A-Za-z]+)\s+(\d{1,2})\s*-\s*([A-Za-z]+)?\s*(\d{1,2}),?\s*(\d{4})",
+        p,
+    )
+    if m:
+        mon1, day1, mon2, day2, year = m.groups()
+        mon1_num = MONTHS.get(mon1.lower())
+        mon2_num = MONTHS.get(mon2.lower()) if mon2 else mon1_num
+        if mon1_num and mon2_num:
+            try:
+                start = datetime(int(year), mon1_num, int(day1)).date().isoformat()
+                end = datetime(int(year), mon2_num, int(day2)).date().isoformat()
+                return start, end
+            except ValueError:
+                pass
+
+    # Pattern: "<Month> <Year> onwards"
+    m = re.match(r"([A-Za-z]+)\s+(\d{4})\s+onwards", p, re.IGNORECASE)
+    if m:
+        mon, year = m.groups()
+        mon_num = MONTHS.get(mon.lower())
+        if mon_num:
+            try:
+                start = datetime(int(year), mon_num, 1).date().isoformat()
+                return start, None
+            except ValueError:
+                pass
+
+    # Pattern: "<Year> onwards"
+    m = re.match(r"(\d{4})\s+onwards", p, re.IGNORECASE)
+    if m:
+        year = m.group(1)
+        try:
+            start = datetime(int(year), 1, 1).date().isoformat()
+            return start, None
+        except ValueError:
+            pass
+
+    # Pattern: just "<Month> <Year>" with nothing else
+    m = re.match(r"^([A-Za-z]+)\s+(\d{4})$", p)
+    if m:
+        mon, year = m.groups()
+        mon_num = MONTHS.get(mon.lower())
+        if mon_num:
+            try:
+                start = datetime(int(year), mon_num, 1).date().isoformat()
+                return start, None
+            except ValueError:
+                pass
+
+    # Pattern: "<Month> - <Month> <Year>" (month range, no day numbers),
+    # e.g. "August - September 2026"
+    m = re.match(r"^([A-Za-z]+)\s*-\s*([A-Za-z]+)\s+(\d{4})$", p)
+    if m:
+        mon1, mon2, year = m.groups()
+        mon1_num = MONTHS.get(mon1.lower())
+        mon2_num = MONTHS.get(mon2.lower())
+        if mon1_num and mon2_num:
+            try:
+                start = datetime(int(year), mon1_num, 1).date().isoformat()
+                end_year = int(year) if mon2_num >= mon1_num else int(year) + 1
+                if mon2_num == 12:
+                    end = datetime(end_year, 12, 31).date().isoformat()
+                else:
+                    from datetime import timedelta
+                    end = (datetime(end_year, mon2_num + 1, 1).date() - timedelta(days=1)).isoformat()
+                return start, end
+            except ValueError:
+                pass
+
+    return None, None
+
+
 def send_discord_notification(event: dict) -> None:
     if not DISCORD_WEBHOOK_URL:
-        print("WARNING: DISCORD_WEBHOOK_URL not set, skipping Discord notification.")
-        print(f"Would have notified about: {event['title']} ({event['url']})")
+        print(f"WARNING: DISCORD_WEBHOOK_URL not set. Would have notified: {event['title']} ({event['url']})")
         return
 
     embed = {
@@ -218,6 +295,28 @@ def send_discord_notification(event: dict) -> None:
         print(f"Notified Discord about: {event['title']}")
 
 
+def write_calendar_json(all_tournaments: list) -> None:
+    DOCS_DIR.mkdir(exist_ok=True)
+    calendar_events = []
+    for e in all_tournaments:
+        start, end = parse_period_to_dates(e["period"])
+        calendar_events.append({
+            "title": e["title"],
+            "url": e["url"],
+            "section": e["section"],
+            "label": e["label"] or "Tournament",
+            "period_text": e["period"],
+            "start_date": start,
+            "end_date": end,
+        })
+    payload = {
+        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "events": calendar_events,
+    }
+    EVENTS_JSON_FILE.write_text(json.dumps(payload, indent=2))
+    print(f"Wrote {len(calendar_events)} tournaments to {EVENTS_JSON_FILE}")
+
+
 def main():
     print(f"Fetching {EVENTS_URL} ...")
     html = fetch_page(EVENTS_URL)
@@ -226,10 +325,7 @@ def main():
     in_scope = [e for e in all_events if e["section"].lower() in INCLUDED_SECTIONS]
     tournaments = [e for e in in_scope if e["is_tournament"]]
 
-    excluded_count = len(all_events) - len(in_scope)
     print(f"Monitoring sections: {', '.join(s for s in ALL_SECTIONS if s.lower() in INCLUDED_SECTIONS)}")
-    if excluded_count:
-        print(f"({excluded_count} event(s) skipped -- outside monitored sections)")
     print(f"Parsed {len(in_scope)} in-scope event cards, {len(tournaments)} tagged as Tournament.")
 
     seen = load_seen()
@@ -244,14 +340,14 @@ def main():
             send_discord_notification(e)
             seen.add(e["url"])
 
-    # Also record any non-tournament events we've seen so we don't
-    # re-evaluate them every run (keeps state file meaningful), but only
-    # tournament URLs gate notifications. Only in-scope events are recorded,
-    # so excluded sections won't be marked "seen" until you re-include them.
     for e in in_scope:
         seen.add(e["url"])
 
     save_seen(seen)
+
+    # Regenerate the calendar data file with every known in-scope tournament
+    write_calendar_json(tournaments)
+
     print("Done.")
 
 
