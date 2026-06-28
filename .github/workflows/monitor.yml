@@ -9,7 +9,12 @@ permissions:
   contents: write
 
 env:
+  # --- SECTION TOGGLE ---
+  # Comma-separated list of sections to monitor for tournament posts.
+  # Options: "Championship", "Official Events", "Shop Events", "Convention Events"
   INCLUDED_SECTIONS: "Championship,Official Events,Shop Events"
+  # To also include Convention Events, change the line above to:
+  # INCLUDED_SECTIONS: "Championship,Official Events,Shop Events,Convention Events"
 
 jobs:
   check:
@@ -26,16 +31,16 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run monitor
+      - name: Run monitor (checks for new tournaments + rebuilds calendar data)
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           INCLUDED_SECTIONS: ${{ env.INCLUDED_SECTIONS }}
         run: python monitor.py
 
-      - name: Commit updated state file
+      - name: Commit updated state + calendar data
         run: |
           git config user.name "op-tournament-monitor-bot"
           git config user.email "actions@github.com"
-          git add seen.json
-          git diff --quiet --cached || git commit -m "Update seen events [skip ci]"
+          git add seen.json docs/events.json
+          git diff --quiet --cached || git commit -m "Update seen events and calendar data [skip ci]"
           git push
