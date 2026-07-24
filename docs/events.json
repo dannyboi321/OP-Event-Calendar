@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-24T04:21:27.574577Z",
+  "generated_at": "2026-07-24T07:09:16.740497Z",
   "events": [
     {
       "title": "Championship 26-27 Finals",
@@ -98,6 +98,15 @@
       "label": "Tournament",
       "period_text": "March 2026 onwards",
       "start_date": "2026-03-01",
+      "end_date": null
+    },
+    {
+      "title": "Extra Grand Battle for Stores 2026 September-October",
+      "url": "https://en.onepiece-cardgame.com/events/extra-battle-sep-2026.html",
+      "section": "Shop Events",
+      "label": "Tournament",
+      "period_text": "Sep \u2013 Oct, 2026",
+      "start_date": null,
       "end_date": null
     },
     {
