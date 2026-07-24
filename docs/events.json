@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-24T09:56:48.394273Z",
+  "generated_at": "2026-07-24T11:48:34.761309Z",
   "events": [
     {
       "title": "Championship 26-27 Finals",
@@ -56,15 +56,6 @@
       "end_date": null
     },
     {
-      "title": "BANDAI CARD GAMES Fest feat. ONE PIECE CARD GAME DALLAS",
-      "url": "https://en.onepiece-cardgame.com/events/2026/bcgfest26-27/dallas/",
-      "section": "Official Events",
-      "label": "Tournament",
-      "period_text": "September 18 - 20, 2026",
-      "start_date": "2026-09-18",
-      "end_date": "2026-09-20"
-    },
-    {
       "title": "BANDAI CARD GAMES Fest feat. ONE PIECE CARD GAME UTRECHT",
       "url": "https://en.onepiece-cardgame.com/events/2026/bcgfest26-27/utrecht/",
       "section": "Official Events",
@@ -72,6 +63,15 @@
       "period_text": "September 4 - 6, 2026",
       "start_date": "2026-09-04",
       "end_date": "2026-09-06"
+    },
+    {
+      "title": "BANDAI CARD GAMES Fest feat. ONE PIECE CARD GAME DALLAS",
+      "url": "https://en.onepiece-cardgame.com/events/2026/bcgfest26-27/dallas/",
+      "section": "Official Events",
+      "label": "Tournament",
+      "period_text": "September 18 - 20, 2026",
+      "start_date": "2026-09-18",
+      "end_date": "2026-09-20"
     },
     {
       "title": "Treasure Cup August 2026",
@@ -96,8 +96,8 @@
       "url": "https://en.onepiece-cardgame.com/events/flameflame_Coliseum.html",
       "section": "Official Events",
       "label": "Tournament",
-      "period_text": "March 2026 onwards",
-      "start_date": "2026-03-01",
+      "period_text": "September 2026 onwards",
+      "start_date": "2026-09-01",
       "end_date": null
     },
     {
@@ -119,8 +119,8 @@
       "end_date": null
     },
     {
-      "title": "ONE PIECE CARD GAME Official Shop Buddy Battle",
-      "url": "https://en.onepiece-cardgame.com/events/2026/store-buddy-battle/",
+      "title": "ONE PIECE CARD GAME Official Shop Welcome Event",
+      "url": "https://en.onepiece-cardgame.com/events/2026/welcome-event/",
       "section": "Shop Events",
       "label": "Official Shop Only Regularly Held Tournament",
       "period_text": "2026 onwards",
@@ -128,8 +128,8 @@
       "end_date": null
     },
     {
-      "title": "ONE PIECE CARD GAME Official Shop Welcome Event",
-      "url": "https://en.onepiece-cardgame.com/events/2026/welcome-event/",
+      "title": "ONE PIECE CARD GAME Official Shop Buddy Battle",
+      "url": "https://en.onepiece-cardgame.com/events/2026/store-buddy-battle/",
       "section": "Shop Events",
       "label": "Official Shop Only Regularly Held Tournament",
       "period_text": "2026 onwards",
