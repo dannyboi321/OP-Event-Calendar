@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-30T02:42:12.938163Z",
+  "generated_at": "2026-07-30T05:45:21.069048Z",
   "events": [
     {
       "title": "Championship 26-27 Finals",
@@ -72,6 +72,15 @@
       "period_text": "September 4 - 6, 2026",
       "start_date": "2026-09-04",
       "end_date": "2026-09-06"
+    },
+    {
+      "title": "BANDAI CARD GAMES Fest 26-27",
+      "url": "https://en.onepiece-cardgame.com/events/bcgfest26-27.html",
+      "section": "Official Events",
+      "label": "Tournament",
+      "period_text": "October 2026 \u2013 Enjoy Bandai\u2019s trading card game titles and connecting with fellow fans at \u201cBANDAI CARD GAMES Fest\u201d, a card game event featuring BANDAI CARD GAMES\u2019 titles!",
+      "start_date": null,
+      "end_date": null
     },
     {
       "title": "Treasure Cup August 2026",
