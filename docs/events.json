@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-18T07:41:12.089692Z",
+  "generated_at": "2026-08-18T08:41:16.493116Z",
   "events": [
     {
       "title": "Championship 26-27 Finals",
@@ -80,6 +80,15 @@
       "label": "Tournament",
       "period_text": "August 2026 onwards",
       "start_date": "2026-08-01",
+      "end_date": null
+    },
+    {
+      "title": "Flame-Flame Fruit Coliseum",
+      "url": "https://en.onepiece-cardgame.com/events/flameflame_Coliseum.html",
+      "section": "Official Events",
+      "label": "Tournament",
+      "period_text": "September 2026 onwards",
+      "start_date": "2026-09-01",
       "end_date": null
     },
     {
