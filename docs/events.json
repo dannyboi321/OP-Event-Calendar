@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-21T07:01:23.191170Z",
+  "generated_at": "2026-08-21T08:06:13.047218Z",
   "events": [
     {
       "title": "Championship 26-27 Finals",
@@ -11,15 +11,6 @@
       "end_date": "2026-09-30"
     },
     {
-      "title": "Championship 26-27 Finals Season 1 Side Event Prize Wall",
-      "url": "https://en.onepiece-cardgame.com/events/Finals-2026s1-side.html",
-      "section": "Championship",
-      "label": "Tournament",
-      "period_text": "August-September 2026",
-      "start_date": "2026-08-01",
-      "end_date": "2026-09-30"
-    },
-    {
       "title": "Championship 26-27 Regionals Season 2",
       "url": "https://en.onepiece-cardgame.com/events/regional-season2-26-27.html",
       "section": "Championship",
@@ -27,6 +18,15 @@
       "period_text": "August 2026 onwards",
       "start_date": "2026-08-01",
       "end_date": null
+    },
+    {
+      "title": "Championship 26-27 Finals Season 1 Side Event Prize Wall",
+      "url": "https://en.onepiece-cardgame.com/events/Finals-2026s1-side.html",
+      "section": "Championship",
+      "label": "Tournament",
+      "period_text": "August-September 2026",
+      "start_date": "2026-08-01",
+      "end_date": "2026-09-30"
     },
     {
       "title": "Championship 26-27 Regionals Season 2 Side Event Prize Wall",
