@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-04T03:46:39.272285Z",
+  "generated_at": "2026-09-04T08:40:57.090218Z",
   "events": [
     {
       "title": "Championship 26-27 Finals Season 2",
@@ -20,21 +20,21 @@
       "end_date": "2026-09-30"
     },
     {
-      "title": "Championship 26-27 S1 Last Chance Qualifier",
-      "url": "https://en.onepiece-cardgame.com/events/Finals-2026s1-lcq.html",
-      "section": "Championship",
-      "label": "Tournament",
-      "period_text": "September 2026",
-      "start_date": "2026-09-01",
-      "end_date": null
-    },
-    {
       "title": "Championship 26-27 Regionals Season 2",
       "url": "https://en.onepiece-cardgame.com/events/regional-season2-26-27.html",
       "section": "Championship",
       "label": "Tournament",
       "period_text": "August 2026 onwards",
       "start_date": "2026-08-01",
+      "end_date": null
+    },
+    {
+      "title": "Championship 26-27 S1 Last Chance Qualifier",
+      "url": "https://en.onepiece-cardgame.com/events/Finals-2026s1-lcq.html",
+      "section": "Championship",
+      "label": "Tournament",
+      "period_text": "September 2026",
+      "start_date": "2026-09-01",
       "end_date": null
     },
     {
@@ -137,8 +137,8 @@
       "end_date": null
     },
     {
-      "title": "ONE PIECE CARD GAME Official Shop Buddy Battle",
-      "url": "https://en.onepiece-cardgame.com/events/2026/store-buddy-battle/",
+      "title": "ONE PIECE CARD GAME Official Shop Welcome Event",
+      "url": "https://en.onepiece-cardgame.com/events/2026/welcome-event/",
       "section": "Shop Events",
       "label": "Official Shop Only Regularly Held Tournament",
       "period_text": "2026 onwards",
@@ -146,8 +146,8 @@
       "end_date": null
     },
     {
-      "title": "ONE PIECE CARD GAME Official Shop Welcome Event",
-      "url": "https://en.onepiece-cardgame.com/events/2026/welcome-event/",
+      "title": "ONE PIECE CARD GAME Official Shop Buddy Battle",
+      "url": "https://en.onepiece-cardgame.com/events/2026/store-buddy-battle/",
       "section": "Shop Events",
       "label": "Official Shop Only Regularly Held Tournament",
       "period_text": "2026 onwards",
