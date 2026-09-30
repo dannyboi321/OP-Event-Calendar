@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-30T04:51:19.271478Z",
+  "generated_at": "2026-09-30T11:00:17.482395Z",
   "events": [
     {
       "title": "Championship 26-27 Finals Season 2",
@@ -110,17 +110,8 @@
       "end_date": null
     },
     {
-      "title": "Store Tournament 2026 Vol. 3",
-      "url": "https://en.onepiece-cardgame.com/events/02_315.html",
-      "section": "Shop Events",
-      "label": "Tournament",
-      "period_text": "July 1 \u2013 September 30, 2026",
-      "start_date": null,
-      "end_date": null
-    },
-    {
-      "title": "ONE PIECE CARD GAME Official Shop Buddy Battle",
-      "url": "https://en.onepiece-cardgame.com/events/2026/store-buddy-battle/",
+      "title": "ONE PIECE CARD GAME Official Shop Welcome Event",
+      "url": "https://en.onepiece-cardgame.com/events/2026/welcome-event/",
       "section": "Shop Events",
       "label": "Official Shop Only Regularly Held Tournament",
       "period_text": "2026 onwards",
@@ -128,8 +119,8 @@
       "end_date": null
     },
     {
-      "title": "ONE PIECE CARD GAME Official Shop Welcome Event",
-      "url": "https://en.onepiece-cardgame.com/events/2026/welcome-event/",
+      "title": "ONE PIECE CARD GAME Official Shop Buddy Battle",
+      "url": "https://en.onepiece-cardgame.com/events/2026/store-buddy-battle/",
       "section": "Shop Events",
       "label": "Official Shop Only Regularly Held Tournament",
       "period_text": "2026 onwards",
