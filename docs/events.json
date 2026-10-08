@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-08T07:08:42.664099Z",
+  "generated_at": "2026-10-08T14:48:40.317904Z",
   "events": [
     {
       "title": "Championship 26-27 Finals Season 2",
@@ -105,9 +105,9 @@
       "url": "https://en.onepiece-cardgame.com/events/extra-battle-sep-2026.html",
       "section": "Shop Events",
       "label": "Tournament",
-      "period_text": "Sep \u2013 Oct, 2026",
-      "start_date": null,
-      "end_date": null
+      "period_text": "September 25 - October 11, 2026",
+      "start_date": "2026-09-25",
+      "end_date": "2026-10-11"
     }
   ]
 }
