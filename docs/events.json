@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-09T01:03:35.415970Z",
+  "generated_at": "2026-10-09T07:51:36.639150Z",
   "events": [
     {
       "title": "Championship 26-27 Finals Season 2",
@@ -89,6 +89,15 @@
       "label": "Tournament",
       "period_text": "August 2026 onwards",
       "start_date": "2026-08-01",
+      "end_date": null
+    },
+    {
+      "title": "Heroines Battle Vol.2",
+      "url": "https://en.onepiece-cardgame.com/events/heroines-battle-vol2.html",
+      "section": "Shop Events",
+      "label": "Tournament",
+      "period_text": "November 6 \u2013 December 6, 2026",
+      "start_date": null,
       "end_date": null
     },
     {
