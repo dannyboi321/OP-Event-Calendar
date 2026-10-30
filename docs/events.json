@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-30T01:43:43.719954Z",
+  "generated_at": "2026-10-30T08:20:30.194467Z",
   "events": [
     {
       "title": "Championship 26-27 S2 Last Chance Qualifier",
@@ -18,6 +18,15 @@
       "period_text": "January 2027",
       "start_date": "2027-01-01",
       "end_date": null
+    },
+    {
+      "title": "Championship 26-27 Finals Season 2 Side Event Matching Battle",
+      "url": "https://en.onepiece-cardgame.com/events/Finals-2026s2-side.html",
+      "section": "Championship",
+      "label": "Tournament",
+      "period_text": "December-January 2026",
+      "start_date": "2026-12-01",
+      "end_date": "2027-01-31"
     },
     {
       "title": "Championship 26-27 Regionals Season 2",
