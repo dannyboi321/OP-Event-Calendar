@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-06T07:47:17.229336Z",
+  "generated_at": "2026-11-06T15:47:10.971221Z",
   "events": [
     {
       "title": "Championship 26-27 S2 Last Chance Qualifier",
@@ -89,6 +89,15 @@
       "label": "Tournament",
       "period_text": "September 2026 onwards",
       "start_date": "2026-09-01",
+      "end_date": null
+    },
+    {
+      "title": "Store Treasure Cup 2026 December",
+      "url": "https://en.onepiece-cardgame.com/events/02_553.html",
+      "section": "Shop Events",
+      "label": "Tournament",
+      "period_text": "December 4 \u2013 20, 2026\u200b",
+      "start_date": null,
       "end_date": null
     },
     {
