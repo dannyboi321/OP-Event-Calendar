@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-13T03:17:18.655634Z",
+  "generated_at": "2026-11-13T11:25:59.242736Z",
   "events": [
     {
       "title": "Championship 26-27 S2 Last Chance Qualifier",
@@ -89,6 +89,15 @@
       "label": "Tournament",
       "period_text": "September 2026 onwards",
       "start_date": "2026-09-01",
+      "end_date": null
+    },
+    {
+      "title": "ONE PIECE CARD GAME NIKE Collaboration Tournament",
+      "url": "https://en.onepiece-cardgame.com/events/02_573.html",
+      "section": "Shop Events",
+      "label": "Tournament",
+      "period_text": "February 1 \u2013 April 30, 2027",
+      "start_date": null,
       "end_date": null
     },
     {
